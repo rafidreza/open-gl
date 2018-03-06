@@ -1,1 +1,1 @@
-this is the implimentation of DDA algorithm using glut
+This is a complete repo for having some important implimentation of open gl
