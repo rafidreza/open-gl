@@ -1,59 +1,145 @@
-/*
- * GLUT Shapes Demo
- *
- * Written by Nigel Stewart November 2003
- *
- * This program is test harness for the sphere, cone
- * and torus shapes in GLUT.
- *
- * Spinning wireframe and smooth shaded shapes are
- * displayed until the ESC or q key is pressed.  The
- * number of geometry stacks and slices can be adjusted
- * using the + and - keys.
- */
 #include<windows.h>
-#include<iostream>
+#include<cstdio>
 #include<cmath>
 #include<GL/glut.h>
-
+double camera_angle;
 using namespace std;
+void drawHighTriangle()
+{
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(0.0,0.0,0.0);
+		glVertex3f(0.0,1.0,0.0);
+		glVertex3f(1.0,0.0,0.0);
+	glEnd();
 
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(0.0,0.0,0.0);
+		glVertex3f(0.0,1.0,0.0);
+		glVertex3f(0.0,0.0,1.0);
+	glEnd();
+}
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-    gluLookAt(
-              25.0,25.0,-25.0,
-              0.0,0.0,0.0,
-              0.0,1.0,0.0
-              );
+	glLoadIdentity();
+
+	#define PI 3.1415926535897932
+	double eyex = 25.0*cos(camera_angle*PI/180.0);
+	double eyez = 25.0*sin(camera_angle*PI/180.0);
+	gluLookAt(
+            eyex,25.0,-eyez,
+			  0.0,0.0,0.0,
+			  0.0,1.0,0.0
+		);
+
+
+    //adding the axes,,2 ta line + er moto//
+      glMatrixMode(GL_PROJECTION);
+    glColor3f(0.3,0.3,0.3);
+	glBegin(GL_LINES);
+
+			glVertex3f(0.0,0.0,-15.0);
+			glVertex3f(0.0,0.0,15.0);
+			glEnd();
+
+	glBegin(GL_LINES);
+			glVertex3f(-15.0,0.0,0.0);
+			glVertex3f(15.0,0.0,0.0);
+            glEnd();
     glMatrixMode(GL_MODELVIEW);
-    glColor3f(1,1,1);
+    glColor3f(0.3,0.3,0.3);
+ //grid//
+#define EXTX 14
+#define EXTZ 14
+	glBegin(GL_LINES);
+		double x  = -(double)EXTX;
+		for(int i = 1; i<=2*EXTX+1; i++)
+        {
+			glVertex3f(x,0.0,-15.0);
+			glVertex3f(x,0.0,15.0);
+			x += 1.0;
+		}
+	glEnd();
+	glBegin(GL_LINES);
+		double z = -(double)EXTZ;
+		for(int i = 1; i<=2*EXTZ+1; i++)
+		{
+			glVertex3f(-15.0,0.0,z);
+			glVertex3f(15.0,0.0,z);
+			z += 1.0;
+		}
+	glEnd();
+    glColor3f(1.0,1.0,1.0);
     glBegin(GL_LINE_LOOP);
-        glVertex3f(-15.0,0.0,15.0);
-        glVertex3f(15.0,0.0,15.0);
-        glVertex3f(15.0,0.0,-15.0);
-        glVertex3f(-15.0,0.0,-15.0);
+       glVertex3f(-15.0,0.0,15.0);
+       glVertex3f(15.0,0.0,15.0);
+       glVertex3f(15.0,0.0,-15.0);
+       glVertex3f(-15.0,0.0,-15.0);
     glEnd();
-    glTranslated(5.0,1.0,5.0);
-    glutWireCube(1.0);
-    glFlush();
+
+
+	  glColor3f(1.0,1.0,0.0);
+      glTranslated(5.0,1.0,5.0);
+      glutWireCube(5.0);
+
+
+	  glColor3f(0.0,1.0,1.0);
+	  glTranslated(-8.0,0.0,8.0);
+	  glScalef(5.0,5.0,5.0);
+      drawHighTriangle();
+
+
+
+
+    glutSwapBuffers();
 }
+
+
+void spinDisplay(void)
+{
+	camera_angle = camera_angle + 0.2;
+	if(camera_angle > 360.0)
+		camera_angle = camera_angle - 360.0;
+	glutPostRedisplay();
+}
+
+void mouse(int button, int state, int x, int y)
+{
+		switch(button)
+		{
+		case GLUT_LEFT_BUTTON:
+				if(state==GLUT_DOWN)
+					glutIdleFunc(spinDisplay);
+				break;
+		case GLUT_MIDDLE_BUTTON:
+			if(state==GLUT_DOWN)
+				glutIdleFunc(NULL);
+			break;
+		default:
+			break;
+		}
+}
+
 
 void init(void)
 {
     glClearColor(0.0,0.0,0.0,0.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(70,1,0.1,100.0);//for plane//
 }
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    glutInit(&argc,argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(900,900);
-    glutInitWindowPosition(0,0);
-    glutCreateWindow("Hello 3d");
+    glutInitWindowPosition(100,100);
+    glutCreateWindow("3D Plan");
     init();
     glutDisplayFunc(display);
+    glutMouseFunc(mouse);
     glutMainLoop();
     return 0;
 }
